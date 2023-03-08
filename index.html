@@ -47,109 +47,84 @@
     <script src="AgoraWebSDK/vendor/jquery.min.js"></script>
   </head>
 
-  <body>
+  <body class="dark">
+    <script></script>
     <div id="unity-container" class="unity-desktop">
-      <canvas id="unity-canvas"></canvas>
+      <canvas id="unity-canvas" onclick="window.focus()"></canvas>
+    </div>
+    <div id="loading-cover" style="display: none">
       <div id="unity-loading-bar">
-        <div id="unity-logo"></div>
-        <div id="unity-progress-bar-empty">
+        <div id="unity-logo"><img src="logo.png" /></div>
+        <div id="unity-progress-bar-empty" style="display: none">
           <div id="unity-progress-bar-full"></div>
         </div>
-      </div>
-      <div id="unity-mobile-warning">
-        WebGL builds are not supported on mobile devices.
-      </div>
-      <div id="unity-footer">
-        <div id="unity-webgl-logo"></div>
-        <div id="unity-fullscreen-button"></div>
-        <div id="unity-build-title">Unyted-v.3.3</div>
+        <div class="spinner"></div>
       </div>
     </div>
-
-    <canvas
-      id="inMem_Canvas"
-      height="450"
-      width="450"
-      style="display: none"
-    ></canvas>
-    <canvas
-      id="myCanvas"
-      height="450"
-      width="450"
-      style="display: none"
-    ></canvas>
-
-    <div>
-      <div id="client-stats" class="stats"></div>
-      <div class="row video-group">
-        <div class="col">
-          <p id="local-player-name" class="player-name"></p>
-          <div class="player-with-stats">
-            <div id="local-player" class="player"></div>
-            <div id="local-stats" class="stream-stats stats"></div>
-          </div>
-        </div>
-        <div class="w-100"></div>
-        <div class="col">
-          <div id="remote-playerlist"></div>
-        </div>
-      </div>
-    </div>
-
+    <div id="unity-fullscreen-button" style="display: none"></div>
     <script>
-      var unityInstance;
-      var mainCanvas = document.getElementById("myCanvas");
-      var mainContext = mainCanvas.getContext("2d");
-      var inMemCanvas = document.getElementById("inMem_Canvas");
-      var inMemContext = inMemCanvas.getContext("2d");
-      var canvasWidth = mainCanvas.width;
-      var canvasHeight = mainCanvas.height;
-      var angle = 0;
+      //canvas.addEventListener("mouseover", onMouseDown, false);
 
-      var buildUrl = "Build";
-      var loaderUrl = buildUrl + "/033.loader.js";
-      var config = {
-        dataUrl: buildUrl + "/033.data",
-        frameworkUrl: buildUrl + "/033.framework.js",
-        codeUrl: buildUrl + "/033.wasm",
+      const hideFullScreenButton = "";
+      const buildUrl = "Build";
+      const loaderUrl = buildUrl + "/035.loader.js";
+      const config = {
+        dataUrl: buildUrl + "/035.data",
+        frameworkUrl: buildUrl + "/035.framework.js",
+        codeUrl: buildUrl + "/035.wasm",
         streamingAssetsUrl: "StreamingAssets",
         companyName: "Unyted-v.3.3",
         productName: "Unyted-v.3.3",
         productVersion: "0.1",
       };
 
-      var container = document.querySelector("#unity-container");
-      var canvas = document.querySelector("#unity-canvas");
-      var loadingBar = document.querySelector("#unity-loading-bar");
-      var progressBarFull = document.querySelector("#unity-progress-bar-full");
-      var fullscreenButton = document.querySelector("#unity-fullscreen-button");
-      var mobileWarning = document.querySelector("#unity-mobile-warning");
+      const container = document.querySelector("#unity-container");
+      const canvas = document.querySelector("#unity-canvas");
+      canvas.addEventListener("mouseover", onMouseDown, false);
+
+      const loadingCover = document.querySelector("#loading-cover");
+      const progressBarEmpty = document.querySelector(
+        "#unity-progress-bar-empty"
+      );
+      const progressBarFull = document.querySelector(
+        "#unity-progress-bar-full"
+      );
+      const fullscreenButton = document.querySelector(
+        "#unity-fullscreen-button"
+      );
+      const spinner = document.querySelector(".spinner");
+
+      const canFullscreen = false;
 
       if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
         container.className = "unity-mobile";
         config.devicePixelRatio = 1;
-        mobileWarning.style.display = "block";
-        setTimeout(() => {
-          mobileWarning.style.display = "none";
-        }, 5000);
-      } else {
-        canvas.style.width = "1440px";
-        canvas.style.height = "600px";
       }
-      loadingBar.style.display = "block";
+      loadingCover.style.display = "";
 
-      var script = document.createElement("script");
+      function onMouseDown(event) {
+        console.log("test!@#!@#@");
+        window.focus();
+        console.log("test!@#!@#@");
+      }
+      const script = document.createElement("script");
       script.src = loaderUrl;
       script.onload = () => {
         createUnityInstance(canvas, config, (progress) => {
-          progressBarFull.style.width = 100 * progress + "%";
+          spinner.style.display = "none";
+          progressBarEmpty.style.display = "";
+          progressBarFull.style.width = `${100 * progress}%`;
         })
-          .then((unityInstance2) => {
-            unityInstance = unityInstance2;
-            loadingBar.style.display = "none";
-            fullscreenButton.onclick = () => {
-              unityInstance2.SetFullscreen(1);
-            };
+          .then((unityInstance) => {
+            loadingCover.style.display = "none";
+            if (canFullscreen) {
+              if (!hideFullScreenButton) {
+                fullscreenButton.style.display = "";
+              }
+              fullscreenButton.onclick = () => {
+                unityInstance.SetFullscreen(1);
+              };
+            }
           })
           .catch((message) => {
             alert(message);
